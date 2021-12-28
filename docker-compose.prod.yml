@@ -1,0 +1,58 @@
+version: "3.8"
+services:
+  db:
+    container_name: db
+    image: mariadb:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_HOST: '%'
+    expose:
+      - 3306
+    ports:
+      - "3307:3306"
+    env_file:
+      - .env
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  web:
+    container_name: web
+    build:
+      context: ./
+      dockerfile: Dockerfile.prod
+    command: gunicorn vote_mailedit.wsgi:application --bind 0.0.0.0:8000
+    environment:
+      DJANGO_SETTINGS_MODULE: vote_mailedit.settings.prod
+    env_file:
+      - .env
+    volumes:
+      - static:/home/app/web/static
+      - media:/home/app/web/media
+    depends_on:
+      - db
+    expose:
+      - 8000
+    entrypoint:
+      - sh
+      - config/docker/entrypoint.prod.sh
+
+  nginx:
+    container_name: nginx
+    build: ./config/nginx
+    volumes:
+      - type: bind
+        source: /home/app/certbot/conf/archive
+        target: /etc/nginx/ssl
+      - /home/app/certbot/data:/var/www/certbot
+      - static:/home/app/web/static
+      - media:/home/app/web/media
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+
+volumes:
+  static:
+  media:
+  dbdata:
