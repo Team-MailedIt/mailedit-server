@@ -12,7 +12,7 @@ class User(AbstractUser):
         blank=False,
         null=False,
         error_messages={
-            'unique': _('A user with that email already exists.'),
+            'unique': _('사용자의 이메일 주소가 이미 존재합니다.'),
         }
     )
 
