@@ -327,3 +327,5 @@ fabric.properties
 .DS_Store
 
 *.pem
+credentials.json
+token.json

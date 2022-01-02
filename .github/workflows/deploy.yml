@@ -4,7 +4,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+#    if: github.ref == 'refs/heads/master'
     steps:
       - name: checkout
         uses: actions/checkout@master
@@ -14,13 +14,18 @@ jobs:
           touch .env
           echo "${{ secrets.ENV_VARS }}" >> .env
 
-      - name: create remote directory
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ubuntu
-          key: ${{ secrets.KEY }}
-          script: mkdir -p /home/ubuntu/srv/ubuntu
+    - name: create credentials.json file
+      run: |
+        touch credentials.json
+        echo "${{ secrets.GOOGLE_OAUTH2_CREDENTIALS }}" >> credentials.json
+
+    - name: create remote directory
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ubuntu
+        key: ${{ secrets.KEY }}
+        script: mkdir -p /home/ubuntu/srv/ubuntu
 
       - name: copy source via ssh key
         uses: burnett01/rsync-deployments@4.1
