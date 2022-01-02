@@ -25,7 +25,7 @@ class Template(TimeStampedModel):
     isStar = models.BooleanField(default=False)
 
     # 템플릿 내용. json 배열로 이루어짐
-    content = models.JSONField(default=[])
+    content = models.JSONField(default=dict)
 
 
 class Block(TimeStampedModel):
