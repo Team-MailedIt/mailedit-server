@@ -4,7 +4,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    # if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: checkout
         uses: actions/checkout@master
@@ -40,12 +40,12 @@ jobs:
           script: |
             sh /home/ubuntu/srv/ubuntu/config/scripts/deploy.sh
 
-      # - name: cleanup useless images and containers
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.HOST }}
-      #     username: ubuntu
-      #     key: ${{ secrets.KEY }}
-      #     script: |
-      #       sudo yes y | sudo docker image prune
-      #       sudo yes y | sudo docker container prune
+      - name: cleanup useless images and containers
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ubuntu
+          key: ${{ secrets.KEY }}
+          script: |
+            sudo yes y | sudo docker image prune
+            sudo yes y | sudo docker container prune
