@@ -27,8 +27,10 @@ REDIRECT_URI = BASE_URL + "/api/google/callback"
 User = get_user_model()
 
 
-# 회원가입
+# 일반 이메일 회원가입
 class EmailRegisterAPIView(APIView):
+    permission_classes = ( permissions.AllowAny, )
+
     def post(self, request):
         user_serializer = UserSerializer(data=request.data)
         if user_serializer.is_valid():
@@ -42,13 +44,15 @@ class EmailRegisterAPIView(APIView):
 
             email_verification_helper.send_verification_link(
                 user.email,
-                verification_link=f"http://127.0.0.1:8000/activate/{uidb64}/{token}"
+                verification_link=f"{BASE_URL}/activate/{uidb64}/{token}"
             )
             return Response({"message": "email verification link sent"}, status=status.HTTP_200_OK)
         return Response({"message": "sign up failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ActivateUserAPIView(APIView):
+    permission_classes = ( permissions.AllowAny, )
+
     def get(self, request, uidb64, token):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
@@ -57,15 +61,72 @@ class ActivateUserAPIView(APIView):
             if account_activation_token.check_token(user, token):
                 user.is_active = True
                 user.save()
-                user_serializer = UserSerializer(user)
-                return Response(user_serializer.data, status=status.HTTP_200_OK)
 
-            return Response({"message": "AUTH FAIL"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": "your email has been successfully verified"}, status=status.HTTP_200_OK)
+
+            return Response({"message": "AUTH FAIL - please re-generate the verification link"}, status=status.HTTP_400_BAD_REQUEST)
 
         except ValidationError:
             return Response({"message": "TYPE_ERROR"}, status=status.HTTP_400_BAD_REQUEST)
         except KeyError:
             return Response({"message": "INVALID_KEY"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# 일반 이메일 인증 메일 재발급
+class RetryVerificationAPI(APIView):
+    permission_classes = ( permissions.AllowAny, )
+
+    def post(self, request):
+        user = authenticate(
+            username=request.data.get("email"), password=request.data.get("password")
+        )
+        if user is not None:
+            uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+            token = account_activation_token.make_token(user)
+
+            email_verification_helper.send_verification_link(
+                user.email,
+                verification_link=f"{BASE_URL}/activate/{uidb64}/{token}"
+            )
+
+            return Response({"message": "email verification link sent"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "user not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# 일반 이메일 로그인
+class EmailLoginAPIView(APIView):
+    permission_classes = ( permissions.AllowAny, )
+
+    def post(self, request):
+        user = authenticate(
+            username=request.data.get("email"), password=request.data.get("password")
+        )
+        if user is not None:
+            token = TokenObtainPairSerializer.get_token(user)
+            refresh_token = str(token)
+            access_token = str(token.access_token)
+            res = Response(
+                {
+                    "user": {
+                        "username": user.username,
+                        "password": user.password,
+                    },
+                    "message": "Successfully logged in",
+                    "token": {
+                        "refresh": refresh_token,
+                        "access": access_token,
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
+            res.set_cookie("access", access_token, httponly=True)
+            res.set_cookie("refresh", refresh_token, httponly=True)
+            return res
+        else:
+            return Response(
+                {"message": "Invalid User"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class GoogleLoginCallBackView(APIView):
