@@ -29,6 +29,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
+BASE_URL = env("BASE_URL")
+CLIENT_ID = env("CLIENT_ID")
+CLIENT_SECRET = env("CLIENT_SECRET")
 
 
 ALLOWED_HOSTS = []
@@ -43,9 +46,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 
     # restframework
     'rest_framework',
+    'rest_framework.authtoken',
+    # dj_rest_auth
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    # django-allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    # my app
     'user',
     'service',
 ]
@@ -59,6 +73,21 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+# rest-framework 설정
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    ),
+}
+
+SITE_ID = 1
+
 
 AUTH_USER_MODEL = "user.User"
 
