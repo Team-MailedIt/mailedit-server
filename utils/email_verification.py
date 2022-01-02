@@ -32,7 +32,7 @@ def create_message(sender, to, subject, message_text):
     message["To"] = to
     message["Subject"] = subject
     message.set_content(message_text)
-    return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode('utf8')}
+    return {"raw": base64.urlsafe_b64encode(message.as_bytes()).decode('utf8')}
 
 
 def send_message(service, user_id, message):
