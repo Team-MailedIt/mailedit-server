@@ -17,12 +17,17 @@ jobs:
           touch .env
           echo "${{ secrets.ENV_VARS }}" >> .env
       
-      - name: create-json
-        id: create-json
+      - name: create client-secret.json
         uses: jsdaniell/create-json@1.1.2
         with:
-          name: "credentials.json"
-          json: ${{ secrets.GOOGLE_OAUTH2_CREDENTIALS }}
+          name: "client-secret.json"
+          json: ${{ secrets.CLIENT_SECRET }}
+      
+      - name: create credentials.json
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "client-secret.json"
+          json: ${{ secrets.CREDENTIALS }}
 
       - name: create remote directory
         uses: appleboy/ssh-action@master

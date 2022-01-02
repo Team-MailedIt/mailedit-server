@@ -36,6 +36,7 @@ class EmailRegisterAPIView(APIView):
         if user_serializer.is_valid():
             try:
                 user = user_serializer.save()
+                user.is_active = False
             except:
                 return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
