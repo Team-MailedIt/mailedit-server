@@ -5,7 +5,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.prod
-    command: gunicorn project.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn project.wsgi:application --log-level debug --bind 0.0.0.0:8000
     environment:
       DJANGO_SETTINGS_MODULE: project.settings.prod
     env_file:
