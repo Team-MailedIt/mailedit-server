@@ -74,6 +74,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 # rest-framework 설정
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
@@ -86,6 +87,7 @@ REST_FRAMEWORK = {
 }
 
 SITE_ID = 1
+
 
 AUTH_USER_MODEL = "user.User"
 
