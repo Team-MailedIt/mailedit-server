@@ -22,8 +22,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # Create your views here.
 GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token"
 GOOGLE_EMAIL_URI = "https://www.googleapis.com/oauth2/v1/tokeninfo"
-GOOGLE_LOGIN_URI = BASE_URL + '/api/google/login'
-REDIRECT_URI = BASE_URL + "/api/google/callback"
+REDIRECT_URI = BASE_URL + "/api/google/redirect"
 User = get_user_model()
 
 
@@ -35,17 +34,23 @@ class EmailRegisterAPIView(APIView):
             try:
                 user = user_serializer.save()
             except:
-                return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    user_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
 
             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
             token = account_activation_token.make_token(user)
 
             email_verification_helper.send_verification_link(
                 user.email,
-                verification_link=f"http://127.0.0.1:8000/activate/{uidb64}/{token}"
+                verification_link=f"http://127.0.0.1:8000/activate/{uidb64}/{token}",
             )
-            return Response({"message": "email verification link sent"}, status=status.HTTP_200_OK)
-        return Response({"message": "sign up failed"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "email verification link sent"}, status=status.HTTP_200_OK
+            )
+        return Response(
+            {"message": "sign up failed"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class ActivateUserAPIView(APIView):
@@ -60,17 +65,37 @@ class ActivateUserAPIView(APIView):
                 user_serializer = UserSerializer(user)
                 return Response(user_serializer.data, status=status.HTTP_200_OK)
 
-            return Response({"message": "AUTH FAIL"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "AUTH FAIL"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         except ValidationError:
-            return Response({"message": "TYPE_ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "TYPE_ERROR"}, status=status.HTTP_400_BAD_REQUEST
+            )
         except KeyError:
-            return Response({"message": "INVALID_KEY"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "INVALID_KEY"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class GoogleRedirectView(APIView):
+    # 임시 View. 프런트에서 구현
+    def get(self, request):
+        code = request.query_params.get("code")
+        return Response(
+            {
+                "code": code,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class GoogleLoginCallBackView(APIView):
+    # code를 받아와서 access_token 반환
+    permission_classes = (permissions.AllowAny,)
+
     def get(self, request):
-        print(dict(request.GET))
         code = request.query_params.get("code")
 
         # 받은 code를 이용해서 access_token 받아오기
@@ -82,78 +107,15 @@ class GoogleLoginCallBackView(APIView):
             "grant_type": "authorization_code",
         }
         try:
-            token_res = requests.post(
-                GOOGLE_TOKEN_URI, data=token_body)
+            token_res = requests.post(GOOGLE_TOKEN_URI, data=token_body)
             token_res_data = token_res.json()
+            return Response(token_res_data, status=status.HTTP_200_OK)
+
         except:
             return Response(
                 {"error_msg": "토큰 발급 실패"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        # token 이용해서 email 정보 획득
-        access_token = token_res_data.get("access_token")
-        try:
-            email_res = requests.get(
-                f'{GOOGLE_EMAIL_URI}?access_token={access_token}'
-            )
-            email_res_data = email_res.json()
-            print(email_res_data)
-        except:
-            return Response(
-                {"error_msg": "이메일 정보 획득 실패"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # 이메일 확인해서 회원가입 / 로그인 진행
-        email = email_res_data.get('email')
-        try:
-            user = User.objects.get(email=email)
-            # 로그인
-            print('login')
-            social_user = SocialAccount.objects.get(user=user)
-            login_body = {
-                'access_token': access_token,
-                'code': code
-            }
-            login_res = requests.post(GOOGLE_LOGIN_URI, data=login_body)
-            print(login_res.json())
-            if login_res.status_code == 200:  # 로그인 성공
-                #  토큰 부여
-                token = TokenObtainPairSerializer.get_token(user)
-                refresh_token = str(token)
-                access_token = str(token.access_token)
-                return Response({
-                    "token": {
-                        "access_token": access_token,
-                        "refresh_token": refresh_token
-                    },
-
-                }, status=status.HTTP_200_OK)
-            else:  # 로그인 실패
-                return Response(login_res.json(), status=status.HTTP_400_BAD_REQUEST)
-
-        except User.DoesNotExist:
-            # 회원가입
-            signup_body = {
-                'access_token': access_token,
-                'code': code
-            }
-            signup_res = requests.post(GOOGLE_LOGIN_URI, data=signup_body)
-            if signup_res.status_code == 200:  # 회원가입 성공
-                user = User.objects.get(email=email)
-                token = TokenObtainPairSerializer.get_token(user)
-                refresh_token = str(token)
-                access_token = str(token.access_token)
-                return Response({
-                    "token": {
-                        "access_token": access_token,
-                        "refresh_token": refresh_token
-                    },
-
-                }, status=status.HTTP_200_OK)
-            else:  # 회원가입 실패
-                return Response(signup_res.json(), status=status.HTTP_400_BAD_REQUEST)
 
 
 class GoogleLoginView(SocialLoginView):
@@ -164,9 +126,7 @@ class GoogleLoginView(SocialLoginView):
 
 class TestAuthView(APIView):
     # 로그인 했을때만 가능한 요청
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
         return Response("Success", status=status.HTTP_200_OK)
