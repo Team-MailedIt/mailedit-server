@@ -85,8 +85,8 @@ class GoogleLoginAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
 
     # 클라이언트에서 idToken 받아와서 로그인/회원가입 실행
-    def get(self, request, *args, **kwargs):
-        id_token = request.query_params.get("idToken")
+    def post(self, request, *args, **kwargs):
+        id_token = request.POST.get("idToken")
         user_data = google_validate_id_token(id_token=id_token)
 
         profile_data = {
