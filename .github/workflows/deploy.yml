@@ -17,11 +17,6 @@ jobs:
           touch .env
           echo "${{ secrets.ENV_VARS }}" >> .env
 
-      - name: create credentials.json file
-        run: |
-          touch credentials.json
-          echo "${{ secrets.GOOGLE_OAUTH2_CREDENTIALS }}" >> credentials.json
-
       - name: create remote directory
         uses: appleboy/ssh-action@master
         with:

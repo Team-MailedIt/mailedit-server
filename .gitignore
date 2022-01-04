@@ -328,4 +328,4 @@ fabric.properties
 
 *.pem
 credentials.json
-token.json
+client-secret.json

@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import user.views
 from django.contrib import admin
 from django.urls import path, include
 from user.views import ActivateUserAPIView
@@ -21,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('user.urls')),
     path('activate/<str:uidb64>/<str:token>', ActivateUserAPIView.as_view()),
+    path('email_verified/', user.views.email_verified, name="email_verified")
 ]
