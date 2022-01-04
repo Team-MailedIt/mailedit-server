@@ -1,12 +1,8 @@
-from django.http.response import Http404
+from user.services import google_user_get_or_create, google_validate_id_token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, permissions
 from django.contrib.auth import get_user_model, authenticate
-from dj_rest_auth.registration.views import SocialLoginView
-from allauth.socialaccount.models import SocialAccount
-from allauth.socialaccount.providers.google import views as google_view
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from .serializers import UserSerializer
 import utils.email_verification as email_verification_helper
 from django.utils.encoding import force_bytes, force_str
@@ -16,13 +12,11 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 import requests
 from project.settings.base import BASE_URL, CLIENT_ID, CLIENT_SECRET
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from dj_rest_auth.utils import jwt_encode
 
 # Create your views here.
-GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token"
-GOOGLE_EMAIL_URI = "https://www.googleapis.com/oauth2/v1/tokeninfo"
-REDIRECT_URI = BASE_URL + "/api/google/redirect"
+GOOGLE_VALIDATE_TOKEN_URI = "https://www.googleapis.com/oauth2/v3/tokeninfo"
+GOOGLE_ACCESS_TOKEN_URI = "https://oauth2.googleapis.com/token"
 User = get_user_model()
 
 
@@ -79,54 +73,38 @@ class ActivateUserAPIView(APIView):
             )
 
 
-class GoogleRedirectView(APIView):
-    # 임시 View. 프런트에서 구현
-    def get(self, request):
-        code = request.query_params.get("code")
-        return Response(
-            {
-                "code": code,
-            },
-            status=status.HTTP_200_OK,
-        )
-
-
-class GoogleLoginCallBackView(APIView):
-    # code를 받아와서 access_token 반환
-    permission_classes = (permissions.AllowAny,)
-
-    def get(self, request):
-        code = request.query_params.get("code")
-
-        # 받은 code를 이용해서 access_token 받아오기
-        token_body = {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "code": code,
-            "redirect_uri": REDIRECT_URI,
-            "grant_type": "authorization_code",
-        }
-        try:
-            token_res = requests.post(GOOGLE_TOKEN_URI, data=token_body)
-            token_res_data = token_res.json()
-            return Response(token_res_data, status=status.HTTP_200_OK)
-
-        except:
-            return Response(
-                {"error_msg": "토큰 발급 실패"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-
-class GoogleLoginView(SocialLoginView):
-    adapter_class = google_view.GoogleOAuth2Adapter
-    callback_url = REDIRECT_URI
-    client_class = OAuth2Client
-
-
 class TestAuthView(APIView):
     # 로그인 했을때만 가능한 요청
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
         return Response("Success", status=status.HTTP_200_OK)
+
+
+class GoogleLoginAPIView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    # 클라이언트에서 idToken 받아와서 로그인/회원가입 실행
+    def get(self, request, *args, **kwargs):
+        id_token = request.query_params.get("idToken")
+        user_data = google_validate_id_token(id_token=id_token)
+
+        profile_data = {
+            "email": user_data["email"],
+            "username": user_data.get("given_name", ""),
+            "login_type": "GOOGLE",
+        }
+
+        # We use get-or-create logic here for the sake of the example.
+        # We don't have a sign-up flow.
+        user, _ = google_user_get_or_create(**profile_data)
+        access_token, refresh_token = jwt_encode(user)
+        print(f"access_token: {access_token} refresh_token: {refresh_token}")
+        return Response(
+            {
+                "access_token": str(access_token),
+                "refresh_token": str(refresh_token),
+                "user": UserSerializer(user).data,
+            },
+            status=status.HTTP_200_OK,
+        )
