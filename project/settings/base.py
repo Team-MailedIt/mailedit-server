@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     # restframework
     "rest_framework",
     "rest_framework.authtoken",
+    # jwt
+    "rest_framework_simplejwt",
     # dj_rest_auth
     "dj_rest_auth",
     # my app
@@ -77,6 +79,7 @@ CORS_ALLOWED_ORIGINS = [
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),

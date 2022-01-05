@@ -10,7 +10,6 @@ from utils.token_generator import account_activation_token
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
-import requests
 from project.settings.base import BASE_URL
 from dj_rest_auth.utils import jwt_encode
 
@@ -146,7 +145,7 @@ class GoogleLoginAPIView(APIView):
 
     # 클라이언트에서 idToken 받아와서 로그인/회원가입 실행
     def post(self, request, *args, **kwargs):
-        id_token = request.POST.get("idToken")
+        id_token = request.data.get("idToken")
         user_data = google_validate_id_token(id_token=id_token)
 
         profile_data = {
