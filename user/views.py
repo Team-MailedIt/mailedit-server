@@ -80,10 +80,8 @@ class RetryVerificationAPI(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
-        user = authenticate(
-            username=request.data.get("email"), password=request.data.get("password")
-        )
-        if user is not None:
+        user = User.objects.get(email=request.data.get("email"))
+        if user is not None and user.is_active is False:
             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
             token = account_activation_token.make_token(user)
 
