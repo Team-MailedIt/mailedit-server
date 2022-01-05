@@ -11,12 +11,10 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 import requests
-from project.settings.base import BASE_URL, CLIENT_ID, CLIENT_SECRET
+from project.settings.base import BASE_URL
 from dj_rest_auth.utils import jwt_encode
 
 # Create your views here.
-GOOGLE_VALIDATE_TOKEN_URI = "https://www.googleapis.com/oauth2/v3/tokeninfo"
-GOOGLE_ACCESS_TOKEN_URI = "https://oauth2.googleapis.com/token"
 User = get_user_model()
 
 
@@ -80,7 +78,7 @@ class ActivateUserAPIView(APIView):
 
 # 일반 이메일 인증 메일 재발급
 class RetryVerificationAPI(APIView):
-    permission_classes = ( permissions.AllowAny, )
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         user = authenticate(
@@ -91,27 +89,28 @@ class RetryVerificationAPI(APIView):
             token = account_activation_token.make_token(user)
 
             email_verification_helper.send_verification_link(
-                user.email,
-                verification_link=f"{BASE_URL}/activate/{uidb64}/{token}"
+                user.email, verification_link=f"{BASE_URL}/activate/{uidb64}/{token}"
             )
 
-            return Response({"message": "email verification link sent"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "email verification link sent"}, status=status.HTTP_200_OK
+            )
         else:
-            return Response({"message": "user not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "user not found"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 # 일반 이메일 로그인
 class EmailLoginAPIView(APIView):
-    permission_classes = ( permissions.AllowAny, )
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         user = authenticate(
             username=request.data.get("email"), password=request.data.get("password")
         )
         if user is not None and user.is_active is True:
-            token = TokenObtainPairSerializer.get_token(user)
-            refresh_token = str(token)
-            access_token = str(token.access_token)
+            access_token, refresh_token = jwt_encode(user)
             res = Response(
                 {
                     "user": {
@@ -126,8 +125,6 @@ class EmailLoginAPIView(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
-            res.set_cookie("access", access_token, httponly=True)
-            res.set_cookie("refresh", refresh_token, httponly=True)
             return res
         else:
             return Response(
@@ -159,17 +156,38 @@ class GoogleLoginAPIView(APIView):
 
         # We use get-or-create logic here for the sake of the example.
         # We don't have a sign-up flow.
-        user, _ = google_user_get_or_create(**profile_data)
+        user, isNew = google_user_get_or_create(**profile_data)
+        if not user:
+            return Response(
+                {"message": "해당 이메일로 가입한 일반 사용자가 존재합니다."},
+                status=status.status.HTTP_400_BAD_REQUEST,
+            )
+
         access_token, refresh_token = jwt_encode(user)
-        print(f"access_token: {access_token} refresh_token: {refresh_token}")
-        return Response(
-            {
-                "access_token": str(access_token),
-                "refresh_token": str(refresh_token),
-                "user": UserSerializer(user).data,
-            },
-            status=status.HTTP_200_OK,
-        )
+        if isNew:  # 회원가입 성공
+            return Response(
+                {
+                    "user": UserSerializer(user).data,
+                    "message": "Successfully signed up",
+                    "token": {
+                        "access": str(access_token),
+                        "refresh": str(refresh_token),
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
+        else:  # 로그인 성공
+            return Response(
+                {
+                    "user": UserSerializer(user).data,
+                    "message": "Successfully logged in",
+                    "token": {
+                        "access": str(access_token),
+                        "refresh": str(refresh_token),
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
 
 
 def email_verified(request):

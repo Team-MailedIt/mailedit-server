@@ -31,7 +31,6 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env("DEBUG")
 BASE_URL = env("BASE_URL")
 CLIENT_ID = env("CLIENT_ID")
-CLIENT_SECRET = env("CLIENT_SECRET")
 
 
 ALLOWED_HOSTS = []
@@ -46,20 +45,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",
     # CORS
     "corsheaders",
     # restframework
     "rest_framework",
-    "rest_framework.authtoken",
     # dj_rest_auth
     "dj_rest_auth",
-    "dj_rest_auth.registration",
-    # django-allauth
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.google",
     # my app
     "user",
     "service",
@@ -91,7 +82,6 @@ REST_FRAMEWORK = {
 }
 
 REST_USE_JWT = True
-SITE_ID = 1
 
 
 AUTH_USER_MODEL = "user.User"
@@ -170,10 +160,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PASSWORD_RESET_TIMEOUT = 259200
 
 # Email - SMTP
-EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST="smtp.gmail.com"
-EMAIL_HOST_USER=env("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD=env("EMAIL_HOST_PASSWORD")
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-DEFAULT_FROM_EMAIL=env("EMAIL_HOST_USER")
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = env("EMAIL_HOST_USER")
