@@ -111,6 +111,7 @@ class EmailLoginAPIView(APIView):
         )
         if user is not None and user.is_active is True:
             access_token, refresh_token = jwt_encode(user)
+            print(refresh_token)
             res = Response(
                 {
                     "user": {
@@ -119,8 +120,8 @@ class EmailLoginAPIView(APIView):
                     },
                     "message": "Successfully logged in",
                     "token": {
-                        "refresh": refresh_token,
-                        "access": access_token,
+                        "refresh": str(refresh_token),
+                        "access": str(access_token),
                     },
                 },
                 status=status.HTTP_200_OK,
