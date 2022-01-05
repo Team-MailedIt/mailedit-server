@@ -108,7 +108,7 @@ class EmailLoginAPIView(APIView):
         user = authenticate(
             username=request.data.get("email"), password=request.data.get("password")
         )
-        if user is not None:
+        if user is not None and user.is_active is True:
             token = TokenObtainPairSerializer.get_token(user)
             refresh_token = str(token)
             access_token = str(token.access_token)
