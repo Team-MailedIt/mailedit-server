@@ -49,8 +49,8 @@ def google_user_get_or_create(*, email: str, **extra_data):
     try:
         user = User.objects.get(email=email)
         if user.login_type != "GOOGLE":
-            # 구글로 가입한 유저가 아니라면
-            raise User.DoesNotExist
+            # 해당 이메일로 가입한 일반 유저가 있을 때
+            return None, False
         return user, False
 
     except User.DoesNotExist:

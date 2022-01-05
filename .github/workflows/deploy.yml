@@ -1,9 +1,9 @@
 name: Deploy to EC2
 on:
   push:
-    branches: [master]
+    branches: [master, develop]
   pull_request:
-    branches: [master]
+    branches: [master, develop]
 jobs:
   build:
     name: Build
