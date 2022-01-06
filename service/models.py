@@ -1,6 +1,10 @@
 from django.db import models
+from django.contrib.auth import get_user_model
+from django.db.models.deletion import CASCADE
+import uuid
 
 # Create your models here.
+User = get_user_model()
 
 
 class TimeStampedModel(models.Model):
@@ -13,22 +17,43 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
-class Template(TimeStampedModel):
-    # 템플릿
-
+class Template(TimeStampedModel):  # 템플릿
+    sub_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     # 제목과 부제목
     title = models.CharField(max_length=50, blank=False, null=False)
     subtitle = models.CharField(max_length=30, blank=True, null=False)
 
-    # 기본 템플릿 여부
-    isBase = models.BooleanField(default=False)
+    # 즐겨찾기 여부
     isStar = models.BooleanField(default=False)
 
     # 템플릿 내용. json 배열로 이루어짐
-    content = models.JSONField(default=dict)
+    content = models.JSONField(default=list)
+
+    # 템플릿 소유한 사용자
+    user = models.ForeignKey(User, on_delete=CASCADE, related_name="user_templates")
+
+    REQUIRED_FIELDS = [
+        "title",
+        "content",
+    ]
+
+    def __str__(self):
+        return self.title
+
+
+class BaseTemplate(models.Model):
+    sub_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    title = models.CharField(max_length=50, blank=False, null=False)
+    subtitle = models.CharField(max_length=30, blank=True, null=False)
+    content = models.JSONField(default=list)
+
+    def __str__(self):
+        return self.title
 
 
 class Block(TimeStampedModel):
+    # 고유 id
+    id = models.CharField(max_length=30, primary_key=True, unique=True)
     # 각 템플릿에서 몇번째 순서인지
     index = models.IntegerField()
     # 블록 내 텍스트
@@ -37,3 +62,7 @@ class Block(TimeStampedModel):
     tag = models.CharField(max_length=10)
     # 블록 여부
     flag = models.BooleanField(default=False)
+    # 블록이 속한 템플릿
+    template = models.ForeignKey(
+        Template, on_delete=CASCADE, related_name="template_blocks", null=True
+    )
