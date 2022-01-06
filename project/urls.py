@@ -19,8 +19,9 @@ from django.urls import path, include
 from user.views import ActivateUserAPIView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('user.urls')),
-    path('activate/<str:uidb64>/<str:token>', ActivateUserAPIView.as_view()),
-    path('email_verified/', user.views.email_verified, name="email_verified")
+    path("admin/", admin.site.urls),
+    path("api/", include("user.urls")),
+    path("api/", include("service.urls")),
+    path("activate/<str:uidb64>/<str:token>", ActivateUserAPIView.as_view()),
+    path("email_verified/", user.views.email_verified, name="email_verified"),
 ]
