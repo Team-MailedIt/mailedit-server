@@ -1,12 +1,15 @@
-from user.services import google_user_get_or_create, google_validate_id_token
+from utils.user.google_auth_service import (
+    google_user_get_or_create,
+    google_validate_id_token,
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, permissions
 from django.contrib.auth import get_user_model, authenticate
 from .serializers import UserSerializer
-import utils.email_verification as email_verification_helper
+import utils.user.email_verification_service as email_verification_helper
 from django.utils.encoding import force_bytes, force_str
-from utils.token_generator import account_activation_token
+from utils.user.token_generation_service import account_activation_token
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render

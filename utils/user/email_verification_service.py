@@ -8,10 +8,10 @@ def create_email(to, subject, message_text):
 def send_email(email):
     try:
         email.send()
-        print(f'Message sent to {email.to}.')
+        print(f"Message sent to {email.to}.")
         return email
     except BadHeaderError as error:
-        print('An error occurred: %s' % error)
+        print("An error occurred: %s" % error)
 
 
 def send_verification_link(user_email, verification_link):
