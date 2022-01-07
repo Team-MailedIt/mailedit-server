@@ -44,6 +44,7 @@ jobs:
             sh /home/ubuntu/srv/ubuntu/config/scripts/deploy.sh
 
       - name: cleanup useless images and containers
+        if: steps.extract_branch.outputs.branch == 'master'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
