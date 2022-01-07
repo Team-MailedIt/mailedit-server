@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.deletion import CASCADE
+from django_extensions.validators import HexValidator
 import uuid
 
 # Create your models here.
@@ -66,3 +67,12 @@ class Block(TimeStampedModel):
     template = models.ForeignKey(
         Template, on_delete=CASCADE, related_name="template_blocks", null=True
     )
+
+
+class Group(TimeStampedModel):
+    # 그룹 이름
+    name = models.CharField(max_length=20, blank=False, null=False)
+    # 구별 색의 hex값
+    color = models.CharField(max_length=6, validators=[HexValidator(length=6)])
+    # 그룹 소유 사용자
+    user = models.ForeignKey(User, on_delete=CASCADE, related_name="user_groups")

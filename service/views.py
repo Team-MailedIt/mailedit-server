@@ -2,8 +2,8 @@ from django.http.response import Http404
 from rest_framework import permissions, serializers, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Template, BaseTemplate
-from .serializers import TemplateSerializer, BaseTemplateSerializer
+from .models import Template, BaseTemplate, Group
+from .serializers import TemplateSerializer, BaseTemplateSerializer, GroupSerializer
 
 # Create your views here.
 class MyTemplateListView(APIView):
@@ -107,4 +107,75 @@ class TemplateDetailView(APIView):
         template.delete()
         return Response(
             {"message": "Successfully deleted Template"}, status=status.HTTP_200_OK
+        )
+
+
+class GroupListView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        user = request.user
+        groups = Group.objects.filter(user_id=user.id)
+        serializer = GroupSerializer(groups, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        data = request.data
+        user = request.user
+        serializer = GroupSerializer(data=data, context={"request": request})
+        if serializer.is_valid():
+            group = serializer.save(user=user)
+            return Response(
+                {
+                    "message": "Successfully created Group",
+                    **serializer.data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                {
+                    "message": "Invalid data",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class GroupDetailView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def put(self, request, id):
+        try:
+            group = Group.objects.get(pk=id)
+        except Group.DoesNotExist:
+            raise Http404
+        data = request.data
+        serializer = GroupSerializer(
+            group, data=data, context={"request": request}, partial=True
+        )
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(
+                {
+                    "message": "Successfully updated group",
+                    **serializer.data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                {
+                    "message": "Invalid Request",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def delete(self, request, id):
+        try:
+            group = Group.objects.get(pk=id)
+        except Group.DoesNotExist:
+            raise Http404
+        group.delete()
+        return Response(
+            {"message": "Successfully deleted group"}, status=status.HTTP_200_OK
         )
