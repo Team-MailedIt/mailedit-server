@@ -31,7 +31,7 @@ class BaseTemplateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BaseTemplate
-        fields = ("templateId", "sub_id", "title", "subtitle", "content")
+        fields = ("templateId", "title", "subtitle", "content")
 
     def get_templateId(self, obj):
         return obj.id
