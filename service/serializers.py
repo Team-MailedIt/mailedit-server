@@ -11,11 +11,12 @@ class TemplateSerializer(serializers.ModelSerializer):
         fields = (
             "userId",
             "templateId",
-            "sub_id",
             "title",
             "subtitle",
             "isStar",
             "content",
+            "created_at",
+            "updated_at",
         )
 
     def get_templateId(self, obj):
