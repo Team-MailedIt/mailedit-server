@@ -44,10 +44,10 @@ class EmailRegisterAPIView(APIView):
                 verification_link=f"{BASE_URL}/activate/{uidb64}/{token}",
             )
             return Response(
-                {"message": "email verification link sent"}, status=status.HTTP_200_OK
+                {"detail": "email verification link sent"}, status=status.HTTP_200_OK
             )
         return Response(
-            {"message": "sign up failed"}, status=status.HTTP_400_BAD_REQUEST
+            {"detail": "sign up failed"}, status=status.HTTP_400_BAD_REQUEST
         )
 
 
@@ -64,17 +64,15 @@ class ActivateUserAPIView(APIView):
                 user.save()
                 return redirect(email_verified)
 
-            return Response(
-                {"message": "AUTH FAIL"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "AUTH FAIL"}, status=status.HTTP_400_BAD_REQUEST)
 
         except ValidationError:
             return Response(
-                {"message": "TYPE_ERROR"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "TYPE_ERROR"}, status=status.HTTP_400_BAD_REQUEST
             )
         except KeyError:
             return Response(
-                {"message": "INVALID_KEY"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "INVALID_KEY"}, status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -93,11 +91,11 @@ class RetryVerificationAPI(APIView):
             )
 
             return Response(
-                {"message": "email verification link sent"}, status=status.HTTP_200_OK
+                {"detail": "email verification link sent"}, status=status.HTTP_200_OK
             )
         else:
             return Response(
-                {"message": "user not found"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "user not found"}, status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -116,9 +114,8 @@ class EmailLoginAPIView(APIView):
                 {
                     "user": {
                         "username": user.username,
-                        "password": user.password,
                     },
-                    "message": "Successfully logged in",
+                    "detail": "Successfully logged in",
                     "token": {
                         "refresh": str(refresh_token),
                         "access": str(access_token),
@@ -129,7 +126,7 @@ class EmailLoginAPIView(APIView):
             return res
         else:
             return Response(
-                {"message": "Invalid User"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Invalid User"}, status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -160,7 +157,7 @@ class GoogleLoginAPIView(APIView):
         user, isNew = google_user_get_or_create(**profile_data)
         if not user:
             return Response(
-                {"message": "해당 이메일로 가입한 일반 사용자가 존재합니다."},
+                {"detail": "해당 이메일로 가입한 일반 사용자가 존재합니다."},
                 status=status.status.HTTP_400_BAD_REQUEST,
             )
 
@@ -169,7 +166,7 @@ class GoogleLoginAPIView(APIView):
             return Response(
                 {
                     "user": UserSerializer(user).data,
-                    "message": "Successfully signed up",
+                    "detail": "Successfully signed up",
                     "token": {
                         "access": str(access_token),
                         "refresh": str(refresh_token),
@@ -181,7 +178,7 @@ class GoogleLoginAPIView(APIView):
             return Response(
                 {
                     "user": UserSerializer(user).data,
-                    "message": "Successfully logged in",
+                    "detail": "Successfully logged in",
                     "token": {
                         "access": str(access_token),
                         "refresh": str(refresh_token),
