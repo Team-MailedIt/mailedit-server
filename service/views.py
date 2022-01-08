@@ -26,7 +26,7 @@ class MyTemplateListView(APIView):
             template = serializer.save(user=user)
             return Response(
                 {
-                    "message": "Successfully created Template",
+                    "detail": "Successfully created Template",
                     **serializer.data,
                 },
                 status=status.HTTP_200_OK,
@@ -34,7 +34,7 @@ class MyTemplateListView(APIView):
         else:
             return Response(
                 {
-                    "message": "Invalid Template data",
+                    "detail": "Invalid Template data",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -86,7 +86,7 @@ class TemplateDetailView(APIView):
             serializer.save()
             return Response(
                 {
-                    "message": "Successfully updated template",
+                    "detail": "Successfully updated template",
                     **serializer.data,
                 },
                 status=status.HTTP_200_OK,
@@ -94,7 +94,7 @@ class TemplateDetailView(APIView):
         else:
             return Response(
                 {
-                    "message": "Invalid Request",
+                    "detail": "Invalid Request",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -106,7 +106,7 @@ class TemplateDetailView(APIView):
             raise Http404
         template.delete()
         return Response(
-            {"message": "Successfully deleted Template"}, status=status.HTTP_200_OK
+            {"detail": "Successfully deleted Template"}, status=status.HTTP_200_OK
         )
 
 
@@ -127,7 +127,7 @@ class GroupListView(APIView):
             group = serializer.save(user=user)
             return Response(
                 {
-                    "message": "Successfully created Group",
+                    "detail": "Successfully created Group",
                     **serializer.data,
                 },
                 status=status.HTTP_200_OK,
@@ -135,7 +135,7 @@ class GroupListView(APIView):
         else:
             return Response(
                 {
-                    "message": "Invalid data",
+                    "detail": "Invalid data",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -157,7 +157,7 @@ class GroupDetailView(APIView):
             serializer.save()
             return Response(
                 {
-                    "message": "Successfully updated group",
+                    "detail": "Successfully updated group",
                     **serializer.data,
                 },
                 status=status.HTTP_200_OK,
@@ -165,7 +165,7 @@ class GroupDetailView(APIView):
         else:
             return Response(
                 {
-                    "message": "Invalid Request",
+                    "detail": "Invalid Request",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -177,5 +177,5 @@ class GroupDetailView(APIView):
             raise Http404
         group.delete()
         return Response(
-            {"message": "Successfully deleted group"}, status=status.HTTP_200_OK
+            {"detail": "Successfully deleted group"}, status=status.HTTP_200_OK
         )
