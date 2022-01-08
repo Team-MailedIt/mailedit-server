@@ -23,5 +23,5 @@ urlpatterns = [
     path("api/", include("user.urls")),
     path("api/", include("service.urls")),
     path("activate/<str:uidb64>/<str:token>", ActivateUserAPIView.as_view()),
-    path("email_verified/", user.views.email_verified, name="email_verified"),
+    path("email-verified/", user.views.email_verified, name="email-verified"),
 ]
