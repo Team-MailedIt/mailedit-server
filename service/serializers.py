@@ -5,17 +5,20 @@ from .models import Template, BaseTemplate, Group
 class TemplateSerializer(serializers.ModelSerializer):
     userId = serializers.SerializerMethodField()
     templateId = serializers.SerializerMethodField()
+    createdAt = serializers.SerializerMethodField()
+    updatedAt = serializers.SerializerMethodField()
 
     class Meta:
         model = Template
         fields = (
             "userId",
             "templateId",
-            "sub_id",
             "title",
             "subtitle",
             "isStar",
             "content",
+            "createdAt",
+            "updatedAt",
         )
 
     def get_templateId(self, obj):
@@ -24,13 +27,19 @@ class TemplateSerializer(serializers.ModelSerializer):
     def get_userId(self, obj):
         return obj.user_id
 
+    def get_createdAt(self, obj):
+        return obj.created_at
+
+    def get_updatedAt(self, obj):
+        return obj.updated_at
+
 
 class BaseTemplateSerializer(serializers.ModelSerializer):
     templateId = serializers.SerializerMethodField()
 
     class Meta:
         model = BaseTemplate
-        fields = ("templateId", "sub_id", "title", "subtitle", "content")
+        fields = ("templateId", "title", "subtitle", "content")
 
     def get_templateId(self, obj):
         return obj.id

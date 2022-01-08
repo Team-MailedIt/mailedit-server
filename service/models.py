@@ -19,7 +19,7 @@ class TimeStampedModel(models.Model):
 
 
 class Template(TimeStampedModel):  # 템플릿
-    sub_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # 제목과 부제목
     title = models.CharField(max_length=50, blank=False, null=False)
     subtitle = models.CharField(max_length=30, blank=True, null=False)
@@ -43,7 +43,7 @@ class Template(TimeStampedModel):  # 템플릿
 
 
 class BaseTemplate(models.Model):
-    sub_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=50, blank=False, null=False)
     subtitle = models.CharField(max_length=30, blank=True, null=False)
     content = models.JSONField(default=list)
@@ -65,7 +65,10 @@ class Block(TimeStampedModel):
     flag = models.BooleanField(default=False)
     # 블록이 속한 템플릿
     template = models.ForeignKey(
-        Template, on_delete=CASCADE, related_name="template_blocks", null=True
+        Template,
+        on_delete=CASCADE,
+        related_name="template_blocks",
+        null=True,
     )
 
 
