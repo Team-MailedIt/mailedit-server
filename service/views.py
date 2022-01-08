@@ -75,7 +75,7 @@ class TemplateDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # 템플릿 수정
-    def put(self, request, sub_id):
+    def patch(self, request, sub_id):
         try:
             template = Template.objects.get(sub_id=sub_id)
         except Template.DoesNotExist:
@@ -144,7 +144,7 @@ class GroupListView(APIView):
 class GroupDetailView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
-    def put(self, request, id):
+    def patch(self, request, id):
         try:
             group = Group.objects.get(pk=id)
         except Group.DoesNotExist:
