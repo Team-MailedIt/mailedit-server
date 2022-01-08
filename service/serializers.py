@@ -5,6 +5,8 @@ from .models import Template, BaseTemplate, Group
 class TemplateSerializer(serializers.ModelSerializer):
     userId = serializers.SerializerMethodField()
     templateId = serializers.SerializerMethodField()
+    createdAt = serializers.SerializerMethodField()
+    updatedAt = serializers.SerializerMethodField()
 
     class Meta:
         model = Template
@@ -15,8 +17,8 @@ class TemplateSerializer(serializers.ModelSerializer):
             "subtitle",
             "isStar",
             "content",
-            "created_at",
-            "updated_at",
+            "createdAt",
+            "updatedAt",
         )
 
     def get_templateId(self, obj):
@@ -24,6 +26,12 @@ class TemplateSerializer(serializers.ModelSerializer):
 
     def get_userId(self, obj):
         return obj.user_id
+
+    def get_createdAt(self, obj):
+        return obj.created_at
+
+    def get_updatedAt(self, obj):
+        return obj.updated_at
 
 
 class BaseTemplateSerializer(serializers.ModelSerializer):
