@@ -12,7 +12,6 @@ class MyTemplateListView(APIView):
     def get(self, request):
         # 요청한 사용자가 보유한 템플릿 목록
         user = request.user
-        print(user)
         templates = Template.objects.filter(user_id=user.id)
         serializer = TemplateSerializer(templates, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -52,22 +51,22 @@ class BaseTemplateListView(APIView):
 class TemplateDetailView(APIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    def get_template(self, sub_id):
+    def get_template(self, pk):
         try:  # 마이 템플릿에서 검색
-            template = Template.objects.get(sub_id=sub_id)
+            template = Template.objects.get(pk=pk)
             return (template, False)
 
         except Template.DoesNotExist:
             # 마이 템플릿에 해당 id의 템플릿이 없는 경우
             try:  # 기본 템플릿 중에서 검색
-                template = BaseTemplate.objects.get(sub_id=sub_id)
+                template = BaseTemplate.objects.get(pk=pk)
                 return (template, True)
             except BaseTemplate.DoesNotExist:  # 기본 템플릿 중에도 없으면
                 raise Http404
 
     # 템플릿 조회
-    def get(self, request, sub_id):
-        template, isBase = self.get_template(sub_id)
+    def get(self, request, pk):
+        template, isBase = self.get_template(pk)
         if isBase:
             serializer = BaseTemplateSerializer(template)
         else:
@@ -75,9 +74,9 @@ class TemplateDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # 템플릿 수정
-    def patch(self, request, sub_id):
+    def patch(self, request, pk):
         try:
-            template = Template.objects.get(sub_id=sub_id)
+            template = Template.objects.get(pk=pk)
         except Template.DoesNotExist:
             raise Http404
         data = request.data
@@ -99,9 +98,9 @@ class TemplateDetailView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    def delete(self, request, sub_id):
+    def delete(self, request, pk):
         try:
-            template = Template.objects.get(sub_id=sub_id)
+            template = Template.objects.get(pk=pk)
         except Template.DoesNotExist:
             raise Http404
         template.delete()
