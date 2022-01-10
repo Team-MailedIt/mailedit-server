@@ -47,7 +47,11 @@ class Template(TimeStampedModel):  # 템플릿
 
     # 템플릿이 속한 그룹
     group = models.ForeignKey(
-        Group, on_delete=CASCADE, related_name="group_templates", null=True, blank=True
+        Group,
+        on_delete=models.SET_NULL,
+        related_name="group_templates",
+        null=True,
+        blank=True,
     )
 
     REQUIRED_FIELDS = [
