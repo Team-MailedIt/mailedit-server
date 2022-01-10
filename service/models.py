@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.deletion import CASCADE
-from django.core.validators import RegexValidator
+from django.core.validators import MaxLengthValidator, RegexValidator
 import uuid
 
 # Create your models here.
@@ -69,9 +69,19 @@ class Template(TimeStampedModel):  # 템플릿
 
 
 class BaseTemplate(models.Model):
+    CATEGORY_CHOICES = (
+        ("회사", "회사"),
+        ("학교", "학교"),
+    )
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=50, blank=False, null=False)
     subtitle = models.CharField(max_length=30, blank=True, null=False)
+    category = models.CharField(
+        max_length=6,
+        null=False,
+        default="회사",
+        choices=CATEGORY_CHOICES,
+    )
     content = models.JSONField(default=list)
 
     def __str__(self):
