@@ -63,6 +63,11 @@ class BaseTemplateListView(APIView):
 
     def get(self, request):
         templates = BaseTemplate.objects.all()
+
+        # category 필터링
+        f_category = request.query_params.get("category", None)
+        if f_category is not None:
+            templates = templates.filter(category=f_category)
         serializer = BaseTemplateSerializer(templates, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
