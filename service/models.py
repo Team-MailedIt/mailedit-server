@@ -18,6 +18,18 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
+class Group(TimeStampedModel):
+    # 그룹 이름
+    name = models.CharField(max_length=20, blank=False, null=False)
+    # 구별 색의 hex값
+    color = models.CharField(max_length=6, validators=[HexValidator(length=6)])
+    # 그룹 소유 사용자
+    user = models.ForeignKey(User, on_delete=CASCADE, related_name="user_groups")
+
+    def __str__(self):
+        return f"{self.user.email} - {self.name}"
+
+
 class Template(TimeStampedModel):  # 템플릿
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # 제목과 부제목
@@ -32,6 +44,11 @@ class Template(TimeStampedModel):  # 템플릿
 
     # 템플릿 소유한 사용자
     user = models.ForeignKey(User, on_delete=CASCADE, related_name="user_templates")
+
+    # 템플릿이 속한 그룹
+    group = models.ForeignKey(
+        Group, on_delete=CASCADE, related_name="group_templates", null=True, blank=True
+    )
 
     REQUIRED_FIELDS = [
         "title",
@@ -70,12 +87,3 @@ class Block(TimeStampedModel):
         related_name="template_blocks",
         null=True,
     )
-
-
-class Group(TimeStampedModel):
-    # 그룹 이름
-    name = models.CharField(max_length=20, blank=False, null=False)
-    # 구별 색의 hex값
-    color = models.CharField(max_length=6, validators=[HexValidator(length=6)])
-    # 그룹 소유 사용자
-    user = models.ForeignKey(User, on_delete=CASCADE, related_name="user_groups")
