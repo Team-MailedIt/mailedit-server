@@ -28,14 +28,15 @@ class MyTemplateListView(APIView):
         user = request.user
         serializer = TemplateSerializer(data=data)
         group_ids = Group.objects.filter(user_id=user.id).values_list("id", flat=True)
-        match = int(data["groupId"]) in group_ids
-        if match == False:
-            return Response(
-                {
-                    "detail": "Wrong group",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if data["groupId"] != None:
+            match = int(data["groupId"]) in group_ids
+            if match == False:
+                return Response(
+                    {
+                        "detail": "Wrong group",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         if serializer.is_valid():
             template = serializer.save(user=user)
@@ -102,14 +103,15 @@ class TemplateDetailView(APIView):
         user = request.user
         serializer = TemplateSerializer(template, data=data, partial=True)
         group_ids = Group.objects.filter(user_id=user.id).values_list("id", flat=True)
-        match = int(data["groupId"]) in group_ids
-        if match == False:
-            return Response(
-                {
-                    "detail": "Wrong group",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if data["groupId"] != None:
+            match = int(data["groupId"]) in group_ids
+            if match == False:
+                return Response(
+                    {
+                        "detail": "Wrong group",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         if serializer.is_valid(raise_exception=True):
             template = serializer.save()
