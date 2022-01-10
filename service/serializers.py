@@ -1,4 +1,9 @@
 from rest_framework import serializers
+from utils.service.group_validation_service import (
+    group_name_validator,
+    group_color_validator,
+    color_hex_validator,
+)
 from .models import Template, BaseTemplate, Group
 
 
@@ -14,11 +19,9 @@ class GroupSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         user = self.context.get("request").user
-        groups = Group.objects.filter(user_id=user.id)
-
-        for group in groups:
-            if group.color == data["color"]:
-                raise serializers.ValidationError("Color must be different")
+        group_name_validator(data["name"], user)
+        group_color_validator(data["color"], user)
+        color_hex_validator(data["color"])
         return data
 
 
