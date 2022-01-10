@@ -19,6 +19,16 @@ class MyTemplateListView(APIView):
         # 요청한 사용자가 보유한 템플릿 목록
         user = request.user
         templates = Template.objects.filter(user_id=user.id)
+
+        # group_id로 필터링
+        f_groupId = request.query_params.get("groupId", None)
+        if f_groupId is None:
+            pass
+        elif f_groupId == "null":
+            templates = templates.filter(group_id__isnull=True)
+        else:
+            templates = templates.filter(group_id=f_groupId)
+
         serializer = TemplateDetailSerializer(templates, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
