@@ -3,7 +3,13 @@ from rest_framework import permissions, serializers, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Template, BaseTemplate, Group
-from .serializers import TemplateSerializer, BaseTemplateSerializer, GroupSerializer
+from .serializers import (
+    TemplateSerializer,
+    TemplateDetailSerializer,
+    BaseTemplateSerializer,
+    GroupSerializer,
+    GroupDetailSerializer,
+)
 
 # Create your views here.
 class MyTemplateListView(APIView):
@@ -13,7 +19,7 @@ class MyTemplateListView(APIView):
         # 요청한 사용자가 보유한 템플릿 목록
         user = request.user
         templates = Template.objects.filter(user_id=user.id)
-        serializer = TemplateSerializer(templates, many=True)
+        serializer = TemplateDetailSerializer(templates, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -21,8 +27,20 @@ class MyTemplateListView(APIView):
         data = request.data
         user = request.user
         serializer = TemplateSerializer(data=data)
+        group_ids = Group.objects.filter(user_id=user.id).values_list("id", flat=True)
+        match = int(data["groupId"]) in group_ids
+        if match == False:
+            return Response(
+                {
+                    "detail": "Wrong group",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if serializer.is_valid():
             template = serializer.save(user=user)
+            template.group_id = data["groupId"]
+            template.save()
             return Response(
                 {
                     "detail": "Successfully created Template",
@@ -70,7 +88,7 @@ class TemplateDetailView(APIView):
         if isBase:
             serializer = BaseTemplateSerializer(template)
         else:
-            serializer = TemplateSerializer(template)
+            serializer = TemplateDetailSerializer(template)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # 템플릿 수정
@@ -79,10 +97,24 @@ class TemplateDetailView(APIView):
             template = Template.objects.get(pk=pk)
         except Template.DoesNotExist:
             raise Http404
+
         data = request.data
+        user = request.user
         serializer = TemplateSerializer(template, data=data, partial=True)
+        group_ids = Group.objects.filter(user_id=user.id).values_list("id", flat=True)
+        match = int(data["groupId"]) in group_ids
+        if match == False:
+            return Response(
+                {
+                    "detail": "Wrong group",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
+            template = serializer.save()
+            template.group_id = data["groupId"]
+            template.save()
             return Response(
                 {
                     "detail": "Successfully updated template",
@@ -112,12 +144,14 @@ class TemplateDetailView(APIView):
 class GroupListView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
+    # 그룹 리스트 조회
     def get(self, request):
         user = request.user
         groups = Group.objects.filter(user_id=user.id)
         serializer = GroupSerializer(groups, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    # 그룹 생성
     def post(self, request):
         data = request.data
         user = request.user
@@ -143,6 +177,16 @@ class GroupListView(APIView):
 class GroupDetailView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
+    # 그룹 상세 조회
+    def get(self, request, id):
+        try:
+            group = Group.objects.get(pk=id)
+        except Group.DoesNotExist:
+            raise Http404
+        serializer = GroupDetailSerializer(group, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # 그룹 편집
     def patch(self, request, id):
         try:
             group = Group.objects.get(pk=id)
@@ -169,6 +213,7 @@ class GroupDetailView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+    # 그룹 삭제
     def delete(self, request, id):
         try:
             group = Group.objects.get(pk=id)
