@@ -1,3 +1,4 @@
+from typing import OrderedDict
 from django.http.response import Http404
 from rest_framework import permissions, serializers, status
 from rest_framework.views import APIView
@@ -155,6 +156,31 @@ class TemplateDetailView(APIView):
         template.delete()
         return Response(
             {"detail": "Successfully deleted Template"}, status=status.HTTP_200_OK
+        )
+
+
+class AllTemplateListView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    # 마이템플릿 + 기본템플릿 리스트 조회
+    def get(self, request):
+        result = list()
+
+        # 응답 결과에 기본템플릿 추가
+        base_templates = BaseTemplate.objects.all()
+        base_serializer = BaseTemplateSerializer(base_templates, many=True)
+        result += base_serializer.data
+
+        user = request.user
+        # 응답 결과에 마이템플릿 추가. 로그인 했을 경우
+        if user:
+            my_templates = Template.objects.filter(user_id=user.id)
+            my_serializer = TemplateSerializer(my_templates, many=True)
+            result += my_serializer.data
+
+        return Response(
+            result,
+            status=status.HTTP_200_OK,
         )
 
 
