@@ -178,6 +178,9 @@ class AllTemplateListView(APIView):
             my_serializer = TemplateSerializer(my_templates, many=True)
             result += my_serializer.data
 
+        # 가나다 순으로 정렬
+        result.sort(key=lambda template: template["title"])
+
         return Response(
             result,
             status=status.HTTP_200_OK,
