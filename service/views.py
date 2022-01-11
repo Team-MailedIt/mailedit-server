@@ -25,11 +25,13 @@ class MyTemplateListView(APIView):
         f_groupId = request.query_params.get("groupId", None)
         if f_groupId is None:
             pass
-        elif f_groupId == "0":
+        elif f_groupId == "0":  # 일반 그룹
             templates = templates.filter(group_id__isnull=True)
         else:
             templates = templates.filter(group_id=f_groupId)
 
+        # 가나다순 정렬
+        templates = templates.order_by("title")
         serializer = TemplateDetailSerializer(templates, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -79,6 +81,9 @@ class BaseTemplateListView(APIView):
         f_category = request.query_params.get("category", None)
         if f_category is not None:
             templates = templates.filter(category=f_category)
+
+        # 가나다순 정렬
+        templates = templates.order_by("title")
         serializer = BaseTemplateSerializer(templates, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
