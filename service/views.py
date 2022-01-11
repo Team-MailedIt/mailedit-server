@@ -25,11 +25,13 @@ class MyTemplateListView(APIView):
         f_groupId = request.query_params.get("groupId", None)
         if f_groupId is None:
             pass
-        elif f_groupId == "null":
+        elif f_groupId == "0":  # 일반 그룹
             templates = templates.filter(group_id__isnull=True)
         else:
             templates = templates.filter(group_id=f_groupId)
 
+        # 가나다순 정렬
+        templates = templates.order_by("title")
         serializer = TemplateDetailSerializer(templates, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -79,6 +81,9 @@ class BaseTemplateListView(APIView):
         f_category = request.query_params.get("category", None)
         if f_category is not None:
             templates = templates.filter(category=f_category)
+
+        # 가나다순 정렬
+        templates = templates.order_by("title")
         serializer = BaseTemplateSerializer(templates, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -178,6 +183,9 @@ class AllTemplateListView(APIView):
             my_serializer = TemplateSerializer(my_templates, many=True)
             result += my_serializer.data
 
+        # 가나다 순으로 정렬
+        result.sort(key=lambda template: template["title"])
+
         return Response(
             result,
             status=status.HTTP_200_OK,
@@ -190,9 +198,16 @@ class GroupListView(APIView):
     # 그룹 리스트 조회
     def get(self, request):
         user = request.user
+        result = list()
+
+        # 기본으로 존재하는 일반그룹. id=0
+        result += [
+            {"userId": request.user.id, "id": 0, "name": "일반", "color": "#CED4DA"}
+        ]
         groups = Group.objects.filter(user_id=user.id)
         serializer = GroupSerializer(groups, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        result += serializer.data
+        return Response(result, status=status.HTTP_200_OK)
 
     # 그룹 생성
     def post(self, request):
