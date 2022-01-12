@@ -30,6 +30,15 @@ class MyTemplateListView(APIView):
         else:
             templates = templates.filter(group_id=f_groupId)
 
+        # isStar로 필터링
+        isStar_params = request.query_params.get("isStar", None)
+        if isStar_params == "True":  # 즐겨찾기한 템플릿
+            templates = templates.filter(isStar=True)
+        elif isStar_params == "False":  # 즐겨찾기하지 않은 템플릿
+            templates = templates.filter(isStar=False)
+        else:
+            pass
+
         # 가나다순 정렬
         templates = templates.order_by("title")
         serializer = TemplateDetailSerializer(templates, many=True)
