@@ -95,6 +95,10 @@ class TemplateDetailSerializer(TemplateSerializer):
     def get_group(self, obj):
         if obj.group_id == None:  # 일반 그룹인 경우
             return {"userId": obj.user_id, **GENERAL_GROUP_INFO}
+        else:
+            group = Group.objects.get(id=obj.group_id)
+            serializer = GroupSerializer(group)
+            return serializer.data
 
 
 class BaseTemplateSerializer(serializers.ModelSerializer):
