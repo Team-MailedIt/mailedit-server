@@ -146,9 +146,14 @@ class GoogleLoginAPIView(APIView):
         id_token = request.data.get("idToken")
         user_data = google_validate_id_token(id_token=id_token)
 
+        email = user_data["email"]
+        username = user_data.get("given_name", "")
+        if username == "":
+            username = email.split("@")[0]
+
         profile_data = {
-            "email": user_data["email"],
-            "username": user_data.get("given_name", ""),
+            "email": email,
+            "username": username,
             "login_type": "GOOGLE",
         }
 
