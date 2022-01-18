@@ -5,6 +5,7 @@ from utils.service.group_validation_service import (
     color_hex_validator,
 )
 from .models import Template, BaseTemplate, Group
+from utils.service.general_group_info import GENERAL_GROUP_INFO
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -61,6 +62,8 @@ class TemplateSerializer(serializers.ModelSerializer):
         return obj.user_id
 
     def get_groupId(self, obj):
+        if obj.group_id == None:  # 그룹이 지정되지 않음 (일반 그룹)
+            return 0
         return obj.group_id
 
     def get_createdAt(self, obj):
@@ -71,7 +74,8 @@ class TemplateSerializer(serializers.ModelSerializer):
 
 
 class TemplateDetailSerializer(TemplateSerializer):
-    group = GroupSerializer(many=False, read_only=True)
+    # group = GroupSerializer(many=False, read_only=True)
+    group = serializers.SerializerMethodField()
 
     class Meta:
         model = Template
@@ -87,6 +91,10 @@ class TemplateDetailSerializer(TemplateSerializer):
             "createdAt",
             "updatedAt",
         )
+
+    def get_group(self, obj):
+        if obj.group_id == None:  # 일반 그룹인 경우
+            return {"userId": obj.user_id, **GENERAL_GROUP_INFO}
 
 
 class BaseTemplateSerializer(serializers.ModelSerializer):
