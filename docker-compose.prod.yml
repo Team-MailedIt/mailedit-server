@@ -23,15 +23,10 @@ services:
     container_name: nginx
     build: ./config/nginx
     volumes:
-      - type: bind
-        source: /home/ubuntu/certbot/conf/archive
-        target: /etc/nginx/ssl
-      - /home/ubuntu/certbot/data:/var/www/certbot
       - static:/home/app/web/static
       - media:/home/app/web/media
     ports:
       - "80:80"
-      - "443:443"
     depends_on:
       - web
 
