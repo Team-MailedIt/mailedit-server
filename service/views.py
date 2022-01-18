@@ -11,6 +11,7 @@ from .serializers import (
     GroupSerializer,
     GroupDetailSerializer,
 )
+from utils.service.general_group_info import GENERAL_GROUP_INFO
 
 # Create your views here.
 class MyTemplateListView(APIView):
@@ -210,9 +211,7 @@ class GroupListView(APIView):
         result = list()
 
         # 기본으로 존재하는 일반그룹. id=0
-        result += [
-            {"userId": request.user.id, "id": 0, "name": "일반", "color": "#CED4DA"}
-        ]
+        result += [{"userId": request.user.id, **GENERAL_GROUP_INFO}]
         groups = Group.objects.filter(user_id=user.id)
         serializer = GroupSerializer(groups, many=True)
         result += serializer.data
