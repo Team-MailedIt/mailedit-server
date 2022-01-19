@@ -148,8 +148,6 @@ class GoogleLoginAPIView(APIView):
 
         email = user_data["email"]
         username = user_data.get("given_name", "")
-        if username == "":
-            username = email.split("@")[0]
 
         profile_data = {
             "email": email,

@@ -31,7 +31,12 @@ def google_validate_id_token(*, id_token: str):
 def google_user_create(email, password=None, **extra_fields):
     extra_fields = {"is_staff": False, "is_superuser": False, **extra_fields}
 
-    user = User(email=email, **extra_fields)
+    try:
+        user = User(email=email, **extra_fields)
+    except ValidationError:  # 유효하지 않은 username이면 email에서 추출해서 사용
+        username = email.split("@")[0]
+        extra_fields["username"] = username
+        user = User(email=email, **extra_fields)
 
     if password:
         user.set_password(password)
