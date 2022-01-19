@@ -51,7 +51,6 @@ def google_user_create(email, password=None, **extra_fields):
     return user
 
 
-@transaction.atomic
 def google_user_get_or_create(*, email: str, **extra_data):
     try:
         user = User.objects.get(email=email)
