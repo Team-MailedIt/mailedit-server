@@ -33,8 +33,6 @@ class TemplateSerializer(serializers.ModelSerializer):
     updatedAt = serializers.SerializerMethodField()
     groupId = serializers.SerializerMethodField()
 
-    subtitle = serializers.SerializerMethodField()
-
     class Meta:
         model = Template
         fields = (
@@ -49,11 +47,11 @@ class TemplateSerializer(serializers.ModelSerializer):
             "updatedAt",
         )
 
-    def get_subtitle(self, obj):
-        if obj.subtitle == "":  # 부제가 공백일때
-            return (obj.content[0])["html"]  # 본문의 첫번째 블록을 부제로 반환
-        else:
-            return obj.subtitle
+    def create(self, validated_data):
+        if validated_data.get("subtitle", "") == "":
+            generated_subtitle = (validated_data["content"][0])["html"]
+            validated_data["subtitle"] = generated_subtitle
+        return super().create(validated_data)
 
     def get_templateId(self, obj):
         return obj.id
