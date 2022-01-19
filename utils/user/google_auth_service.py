@@ -34,8 +34,10 @@ def google_user_create(email, password=None, **extra_fields):
     try:
         user = User(email=email, **extra_fields)
     except ValidationError:  # 유효하지 않은 username이면 email에서 추출해서 사용
+        print(extra_fields["username"])
         username = email.split("@")[0]
         extra_fields["username"] = username
+        print(extra_fields["username"])
         user = User(email=email, **extra_fields)
 
     if password:
