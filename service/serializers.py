@@ -6,6 +6,7 @@ from utils.service.group_validation_service import (
 )
 from .models import Template, BaseTemplate, Group
 from utils.service.general_group_info import GENERAL_GROUP_INFO
+from django.utils import timezone
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -29,9 +30,9 @@ class GroupSerializer(serializers.ModelSerializer):
 class TemplateSerializer(serializers.ModelSerializer):
     userId = serializers.SerializerMethodField()
     templateId = serializers.SerializerMethodField()
+    groupId = serializers.SerializerMethodField()
     createdAt = serializers.SerializerMethodField()
     updatedAt = serializers.SerializerMethodField()
-    groupId = serializers.SerializerMethodField()
 
     class Meta:
         model = Template
@@ -53,6 +54,12 @@ class TemplateSerializer(serializers.ModelSerializer):
             validated_data["subtitle"] = generated_subtitle
         return super().create(validated_data)
 
+    def get_createdAt(self, obj):
+        return timezone.localtime(obj.created_at)
+
+    def get_updatedAt(self, obj):
+        return timezone.localtime(obj.updated_at)
+
     def get_templateId(self, obj):
         return obj.id
 
@@ -63,12 +70,6 @@ class TemplateSerializer(serializers.ModelSerializer):
         if obj.group_id == None:  # 그룹이 지정되지 않음 (일반 그룹)
             return 0
         return obj.group_id
-
-    def get_createdAt(self, obj):
-        return obj.created_at
-
-    def get_updatedAt(self, obj):
-        return obj.updated_at
 
 
 class TemplateDetailSerializer(TemplateSerializer):

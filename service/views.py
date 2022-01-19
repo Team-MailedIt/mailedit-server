@@ -51,9 +51,11 @@ class MyTemplateListView(APIView):
         user = request.user
         serializer = TemplateSerializer(data=data)
         group_ids = Group.objects.filter(user_id=user.id).values_list("id", flat=True)
-        if data["groupId"] != None:
-            match = int(data["groupId"]) in group_ids
-            if match == False:
+        if data["groupId"] == 0:  # 사용자가 그룹 지정하지 않았거나 일반 그룹을 지정했을 경우
+            group_id = None
+        else:
+            group_id = data["groupId"]
+            if group_id not in group_ids:
                 return Response(
                     {
                         "detail": "Wrong group",
@@ -63,7 +65,7 @@ class MyTemplateListView(APIView):
 
         if serializer.is_valid():
             template = serializer.save(user=user)
-            template.group_id = data["groupId"]
+            template.group_id = group_id
             template.save()
             return Response(
                 {

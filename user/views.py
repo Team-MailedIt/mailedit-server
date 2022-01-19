@@ -109,7 +109,6 @@ class EmailLoginAPIView(APIView):
         )
         if user is not None and user.is_active is True:
             access_token, refresh_token = jwt_encode(user)
-            print(refresh_token)
             res = Response(
                 {
                     "user": {
@@ -130,12 +129,17 @@ class EmailLoginAPIView(APIView):
             )
 
 
-class TestAuthView(APIView):
-    # 로그인 했을때만 가능한 요청
-    permission_classes = (permissions.IsAuthenticated,)
+class UserCheckView(APIView):
+    permission_classes = (permissions.AllowAny,)
 
+    # 이메일 중복 검사
     def get(self, request):
-        return Response("Success", status=status.HTTP_200_OK)
+        email = request.query_params.get("email")
+        try:
+            user = User.objects.get(email=email)
+            return Response(True, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response(False, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GoogleLoginAPIView(APIView):
