@@ -74,6 +74,7 @@ MIDDLEWARE = [
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
     "https://www.mailedit.me",
+    "https://mailedit.me",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
