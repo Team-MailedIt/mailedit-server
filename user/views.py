@@ -139,7 +139,7 @@ class UserCheckView(APIView):
             user = User.objects.get(email=email)
             return Response(True, status=status.HTTP_200_OK)
         except User.DoesNotExist:
-            return Response(False, status=status.HTTP_400_BAD_REQUEST)
+            return Response(False, status=status.HTTP_200_OK)
 
 
 class GoogleLoginAPIView(APIView):
