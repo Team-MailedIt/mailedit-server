@@ -83,6 +83,7 @@ class BaseTemplate(models.Model):
         choices=CATEGORY_CHOICES,
     )
     content = models.JSONField(default=list)
+    tip = models.CharField(max_length=50, null=False, default="")
 
     def __str__(self):
         return self.title

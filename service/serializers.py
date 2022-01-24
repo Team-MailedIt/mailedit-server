@@ -105,7 +105,7 @@ class BaseTemplateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BaseTemplate
-        fields = ("templateId", "title", "subtitle", "category", "content")
+        fields = ("templateId", "title", "subtitle", "category", "content", "tip")
 
     def get_templateId(self, obj):
         return obj.id
