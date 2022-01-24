@@ -39,7 +39,7 @@ class Template(TimeStampedModel):  # 템플릿
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # 제목과 부제목
     title = models.CharField(max_length=50, blank=False, null=False)
-    subtitle = models.CharField(max_length=30, blank=True, null=False)
+    subtitle = models.CharField(max_length=50, blank=True, null=False)
 
     # 즐겨찾기 여부
     isStar = models.BooleanField(default=False)
