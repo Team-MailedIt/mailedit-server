@@ -67,6 +67,12 @@ class MyTemplateListView(APIView):
             template = serializer.save(user=user)
             template.group_id = group_id
             template.save()
+
+            # 사용자가 템플릿을 3개 이상 저장한 경우 tooltip=false
+            if user.user_templates.count() >= 3:
+                user.tooltip = False
+                user.save()
+
             return Response(
                 {
                     "detail": "Successfully created Template",

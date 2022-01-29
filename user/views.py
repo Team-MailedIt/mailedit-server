@@ -115,6 +115,7 @@ class EmailLoginAPIView(APIView):
                         "username": user.username,
                     },
                     "detail": "Successfully logged in",
+                    "tooltip": user.tooltip,
                     "token": {
                         "refresh": str(refresh_token),
                         "access": str(access_token),
@@ -174,6 +175,7 @@ class GoogleLoginAPIView(APIView):
                 {
                     "user": UserSerializer(user).data,
                     "detail": "Successfully signed up",
+                    "tooltip": user.tooltip,
                     "token": {
                         "access": str(access_token),
                         "refresh": str(refresh_token),
@@ -186,6 +188,7 @@ class GoogleLoginAPIView(APIView):
                 {
                     "user": UserSerializer(user).data,
                     "detail": "Successfully logged in",
+                    "tooltip": user.tooltip,
                     "token": {
                         "access": str(access_token),
                         "refresh": str(refresh_token),

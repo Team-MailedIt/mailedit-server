@@ -27,6 +27,7 @@ class User(AbstractUser):
         choices=LOGIN_TYPE_CHOICES,
     )
 
+    tooltip = models.BooleanField(null=False, default=True)
     objects = UserManager()
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
