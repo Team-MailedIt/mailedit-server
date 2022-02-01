@@ -41,7 +41,7 @@ class MyTemplateListView(APIView):
             pass
 
         # 가나다순 정렬
-        templates = templates.order_by("title")
+        templates = templates.order_by("group_id", "title")
         serializer = TemplateDetailSerializer(templates, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
