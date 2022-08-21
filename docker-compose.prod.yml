@@ -35,6 +35,14 @@ services:
     depends_on:
       - web
 
+  certbot:
+    image: certbot/certbot:latest
+    command: certonly --webroot --webroot-path=/var/www/certbot --email myemail@google.com --agree-tos --no-eff-email -d domain.com
+    volumes:
+        - work dir/certbot/conf:/etc/letsencrypt
+        - work dir/certbot/logs:/var/log/letsencrypt
+        - work dir/certbot/data:/var/www/certbot
+
 volumes:
   static:
   media:
